@@ -1,6 +1,7 @@
 import bcryptjs from "bcryptjs";
 import { User } from "../models/user.model.js";
 import { generateTokenAndSetCookie } from "../utils/generateTokenAndsetCookie.js";
+import { sendVerificationEmail, sendWelcomeEmail } from "../mailtrap/emails.js";
 
 export const signup = async (req, res) => {
   const {email, password, name} = req.body;
@@ -40,9 +41,60 @@ export const signup = async (req, res) => {
 
     generateTokenAndSetCookie(res, user._id);
 
-    return res.status(201).json({success: true, message: "User created successfully"});
+    await sendVerificationEmail(user.email, verificationToken);
 
+    return res.status(201).json({success: true, message: "User created successfully"});
   } catch (error) {
+    return res.status(500).json({success: false, message: error});
+  }
+}
+
+export const verifyEmail = async (req, res) => {
+  const {verificationToken, email} = req.body; 
+
+  try {
+    const user = await User.findOne({
+      email,
+      verificationToken,
+      verificationTokenExpires: { $gt: Date.now() }
+    });
+
+    if(!user) {
+      return res.status(400).json({success: false, message: "Invalid or expired verification token"});
+    } 
+
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    user.verificationTokenExpires = undefined; 
+    await user.save()
+
+    await sendWelcomeEmail(user.email, user.name)
+
+    return res.status(200).json({success: true, message: "Email verified successfully"});
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({success: false, message: error});
+  }
+}
+
+export const sendNewVerificationEmail = async (req, res) => {
+  const {email} = req.body;
+
+  try {
+    const user = await User.findOne({email});
+    if (!user) return res.status(400).json({success: false, message: "User not found"});
+    if (user.isVerified) return res.status(400).json({success: false, message: "User is already verified"});
+
+    const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
+    user.verificationToken = verificationToken;
+    user.verificationTokenExpires = Date.now() + 1000 * 60 * 60 * 24;
+    await user.save();
+
+    await sendVerificationEmail(user.email, verificationToken);
+
+    return res.status(200).json({success: true, message: "Verification email sent successfully"});
+  } catch (error) {
+    console.error(error);
     return res.status(500).json({success: false, message: error});
   }
 }
