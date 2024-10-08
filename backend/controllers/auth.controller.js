@@ -45,7 +45,7 @@ export const signup = async (req, res) => {
 
     return res.status(201).json({success: true, message: "User created successfully"});
   } catch (error) {
-    return res.status(500).json({success: false, message: error});
+    return res.status(500).json({success: false, message: `Internal server error: ${error}`});
   }
 }
 
@@ -73,7 +73,7 @@ export const verifyEmail = async (req, res) => {
     return res.status(200).json({success: true, message: "Email verified successfully"});
   } catch (error) {
     console.error(error);
-    return res.status(500).json({success: false, message: error});
+    return res.status(500).json({success: false, message: `Internal server error: ${error}`});
   }
 }
 
@@ -95,14 +95,44 @@ export const sendNewVerificationEmail = async (req, res) => {
     return res.status(200).json({success: true, message: "Verification email sent successfully"});
   } catch (error) {
     console.error(error);
-    return res.status(500).json({success: false, message: error});
+    return res.status(500).json({success: false, message: `Internal server error: ${error}`});
   }
 }
 
 export const login = async (req, res) => { 
-  res.send("Login");
+  const  {email, password} = req.body;
+
+  try {
+    if (!email || !password) return res.status(400).json({success: false, message: "Please fill in all fields"});
+
+    const user = await User.findOne({email});
+    if (!user) return res.status(400).json({success: false, message: "Email not found"})
+
+    const isMatch = await bcryptjs.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({success: false, message: "Invalid credentials"});
+
+    if (!user.isVerified) return res.status(400).json({success: false, message: "Email not verified. Cannot Login."});
+
+    generateTokenAndSetCookie(res, user._id);
+
+    user.lastLogin = Date.now();
+    await user.save();
+
+    return res.status(200).json({
+      success: true, 
+      message: "Logged in successfully",
+      user: {
+        ...user._doc,
+        password: undefined
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({success: false, message: `Internal server error: ${error}`});
+  }
 }
 
 export const logout = async (req, res) => {
-  res.send("Logout");
+  res.clearCookie("tokenJWT");
+  res.status(200).json({success: true, message: "Logged out successfully"});
 }
