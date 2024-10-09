@@ -6,6 +6,8 @@ import VerifyEmailPage from "./pages/VerifyEmailPage"
 import { Toaster } from "react-hot-toast"
 import { useAuthStore } from "./store/authStore"
 import { useEffect } from "react"
+import HomePage from "./pages/HomePage"
+import LoadingSpinner from "./components/LoadingSpinner"
 
 const RedirectAuthenticatedUser = ({ children }: { children: React.ReactNode }) => {
 	const { isAuthenticated, user } = useAuthStore();
@@ -32,11 +34,15 @@ const ProtectedRoute = ({ children } : { children: React.ReactNode }) => {
 };
 
 function App() {
-  const {  checkAuth } = useAuthStore();
+  const { isCheckingAuth, checkAuth } = useAuthStore();
 
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
+
+  if (isCheckingAuth) {
+    return <LoadingSpinner />
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-emerald-900 flex items-center justify-center relative overflow-hidden">
@@ -66,7 +72,7 @@ function App() {
 
 
       <Routes>
-        <Route path="/" element={<ProtectedRoute><h1>Home</h1></ProtectedRoute>} />
+        <Route path="/" element={<ProtectedRoute><HomePage/></ProtectedRoute>} />
         <Route path="signup" element={<RedirectAuthenticatedUser><SignUpPage/></RedirectAuthenticatedUser>} />
         <Route path="login" element={<RedirectAuthenticatedUser><LoginPage/></RedirectAuthenticatedUser>} />
         <Route path="verify-email" element={<VerifyEmailPage/>} />
