@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
-import { useAuthStore } from "../store/authStore";
+import { useAuthStore } from "../store/authStore"
 import toast from "react-hot-toast";
 
 const VerifyEmailPage = () => {
   const [ code, setCode ] = useState(["", "", "", "", "", ""])
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
   const navigate = useNavigate()
+  const urlparam = new URLSearchParams(window.location.search)
 
   const { error, isLoading, verifyEmail } = useAuthStore();
 
@@ -49,8 +50,9 @@ const VerifyEmailPage = () => {
   const handleSubmit = async (e: Event | React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		const verificationCode = code.join("");
+    console.log(verificationCode);
 		try {
-			await verifyEmail(verificationCode);
+			await verifyEmail(verificationCode, urlparam.get("email")!);
 			navigate("/");
 			toast.success("Email verified successfully");
 		} catch (error) {

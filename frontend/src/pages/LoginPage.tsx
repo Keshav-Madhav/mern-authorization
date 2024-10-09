@@ -1,16 +1,19 @@
 import { motion } from 'framer-motion'
 import Input from '../components/Input'
 import { useState } from 'react'
-import { Lock, Mail } from 'lucide-react'
+import { Loader, Lock, Mail } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { useAuthStore } from "../store/authStore";
 
 const LoginPage = () => {
   const [email, setEmail] = useState<string>('')
   const [password, setPassword] = useState<string>('')
+  const { login, isLoading, error } = useAuthStore();
 
-  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-  }
+	const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		await login(email, password);
+	}
 
   return (
     <motion.div
@@ -46,7 +49,7 @@ const LoginPage = () => {
 							Forgot password?
 						</Link>
 					</div>
-					{/* {error && <p className='text-red-500 font-semibold mb-2'>{error}</p>} */}
+					{error && <p className='text-red-500 font-semibold mb-2'>{error}</p>}
 
 					<motion.button
 						whileHover={{ scale: 1.02 }}
@@ -54,7 +57,7 @@ const LoginPage = () => {
 						className='w-full py-3 px-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-lg shadow-lg hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition duration-200'
 						type='submit'
 					>
-						{/* {isLoading ? <Loader className='w-6 h-6 animate-spin  mx-auto' /> : "Login"} */} Login
+						{isLoading ? <Loader className='w-6 h-6 animate-spin  mx-auto' /> : "Login"}
 					</motion.button>
 				</form>
 			</div>
