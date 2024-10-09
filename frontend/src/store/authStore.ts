@@ -25,6 +25,7 @@ type AuthStore = {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   verifyEmail: (code: string, email: string) => Promise<{ user: any }>;
+	resendVerificationEmail: (email: string) => Promise<void>;
   checkAuth: () => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (token: string, password: string) => Promise<void>;
@@ -99,6 +100,21 @@ export const useAuthStore = create<AuthStore>((set) => ({
       throw error;
     }
   },
+
+	resendVerificationEmail: async (email: string) => {
+		set({ isLoading: true, error: null });
+		try {
+			const response = await axios.post<{ message: string }>(`${API_URL}/send-new-verfication`, { email });
+			set({ message: response.data.message, isLoading: false });
+		} catch (error) {
+			if (error instanceof AxiosError) {
+				set({ error: error.response?.data?.message || "Error resending verification email", isLoading: false });
+			} else {
+				set({ error: "An unexpected error occurred", isLoading: false });
+			}
+			throw error;
+		}
+	},
 
   checkAuth: async () => {
     set({ isCheckingAuth: true, error: null });
