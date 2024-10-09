@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import { connectDB } from "./db/connectDB.js";
+import cookieParser from "cookie-parser";
 
 import authRoutes from "./routes/auth.router.js";
 
@@ -9,6 +10,7 @@ const app = express();
 const port = process.env.PORT || 8080;
 
 app.use(express.json()); // middleware to parse JSON data
+app.use(cookieParser())
 
 app.use('/api/auth', authRoutes)
 
