@@ -13,6 +13,7 @@
     "axios": "^1.7.7",
     "framer-motion": "^11.11.4",
     "lucide-react": "^0.451.0",
+    "mern-authorization": "file:..",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hot-toast": "^2.4.1",
