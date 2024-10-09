@@ -8,6 +8,8 @@ import { useAuthStore } from "./store/authStore"
 import { useEffect } from "react"
 import HomePage from "./pages/HomePage"
 import LoadingSpinner from "./components/LoadingSpinner"
+import ForgotPasswordPage from "./pages/ForgotPasswordPage"
+import ResetPasswordPage from "./pages/ResetPasswordPage"
 
 const RedirectAuthenticatedUser = ({ children }: { children: React.ReactNode }) => {
 	const { isAuthenticated, user } = useAuthStore();
@@ -73,9 +75,12 @@ function App() {
 
       <Routes>
         <Route path="/" element={<ProtectedRoute><HomePage/></ProtectedRoute>} />
-        <Route path="signup" element={<RedirectAuthenticatedUser><SignUpPage/></RedirectAuthenticatedUser>} />
-        <Route path="login" element={<RedirectAuthenticatedUser><LoginPage/></RedirectAuthenticatedUser>} />
-        <Route path="verify-email" element={<VerifyEmailPage/>} />
+        <Route path="/signup" element={<RedirectAuthenticatedUser><SignUpPage/></RedirectAuthenticatedUser>} />
+        <Route path="/login" element={<RedirectAuthenticatedUser><LoginPage/></RedirectAuthenticatedUser>} />
+        <Route path="/verify-email" element={<VerifyEmailPage/>} />
+        <Route path="/forgot-password" element={<RedirectAuthenticatedUser><ForgotPasswordPage/></RedirectAuthenticatedUser>} />
+        <Route path="/reset-password/:token" element={<RedirectAuthenticatedUser><ResetPasswordPage/></RedirectAuthenticatedUser>} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 
       <Toaster/>
